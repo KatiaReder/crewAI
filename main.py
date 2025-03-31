@@ -34,6 +34,16 @@ redator = Agent(
     allow_delegation=False
 )
 
+tradutor = Agent(  
+    role="Tradutor Automático",
+    goal="Traduzir textos de português para inglês de forma fluida e natural",
+    backstory="""Você é um tradutor automático que traduz textos entre inglês e português com precisão 
+    e fluência.""",
+    verbose=True,
+    llm=llm,
+    allow_delegation=False
+)
+
 # 4. Criar Tarefas com instruções explícitas de idioma
 pesquisa_task = Task(
     description="""Realize uma pesquisa detalhada em português sobre os impactos da IA no mercado de trabalho em 2024.
@@ -52,19 +62,36 @@ redacao_task = Task(
     context=[pesquisa_task]  # Recebe o resultado da pesquisa
 )
 
+traducao_task = Task(
+    description="""Traduza o artigo gerado para o inglês de forma fluida e natural, preservando o estilo e o tom.
+    IMPORTANTE: A tradução deve ser fiel ao conteúdo original, mas com leitura natural em inglês.""",
+    expected_output="Versão traduzida do artigo em inglês.",
+    agent=tradutor,
+    context=[redacao_task],
+    output_file="output/artigo_en.md"
+)
+
 # 5. Criar a Equipe (Crew)
 equipe_blog = Crew(
-    agents=[pesquisador, redator],
-    tasks=[pesquisa_task, redacao_task],
+    agents=[pesquisador, redator, tradutor],
+    tasks=[pesquisa_task, redacao_task, traducao_task],
     verbose=True
 )
 
 # 6. Executar
 try:
-    print("⏳ Processando conteúdo em português...")
+    print("⏳ Processando conteúdo em português e realizando a tradução...")
     resultado = equipe_blog.kickoff()
+
+    # Converter CrewOutput para string
+    resultado_str = str(resultado)
+
+    # Salvar como Markdown
+    with open("resultado.md", "w", encoding="utf-8") as f:
+        f.write("# Resultado do Agente 🤖\n\n")  # Título no Markdown
+        f.write(resultado_str)  # Escreve o conteúdo gerado
     
-    print("\n📝 Conteúdo em Português Gerado:")
+    print("\n📝 Conteúdo em Português e Inglês Gerado:")
     print(resultado)
     
 except Exception as e:
