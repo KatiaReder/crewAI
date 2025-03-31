@@ -3,6 +3,8 @@ from dotenv import load_dotenv
 from crewai import Agent, Task, Crew
 from langchain_groq import ChatGroq
 
+# Katia Andrade e Carolina Ramos
+
 # 1. Configuração inicial
 load_dotenv()
 
